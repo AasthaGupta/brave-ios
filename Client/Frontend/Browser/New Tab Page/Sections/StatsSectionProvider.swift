@@ -43,8 +43,6 @@ class BraveShieldStatsView: UIView, Themeable {
         
     }
     
-    fileprivate let millisecondsPerItem: Int = 50
-    
     private lazy var adsStatView: StatView = {
         let statView = StatView(frame: CGRect.zero)
         statView.title = Strings.shieldsAdAndTrackerStats
@@ -102,38 +100,7 @@ class BraveShieldStatsView: UIView, Themeable {
     @objc private func update() {
         adsStatView.stat = (BraveGlobalShieldStats.shared.adblock + BraveGlobalShieldStats.shared.trackingProtection).kFormattedNumber
         httpsStatView.stat = BraveGlobalShieldStats.shared.httpse.kFormattedNumber
-        timeStatView.stat = timeSaved
-    }
-    
-    var timeSaved: String {
-        get {
-            let estimatedMillisecondsSaved = (BraveGlobalShieldStats.shared.adblock + BraveGlobalShieldStats.shared.trackingProtection) * millisecondsPerItem
-            let hours = estimatedMillisecondsSaved < 1000 * 60 * 60 * 24
-            let minutes = estimatedMillisecondsSaved < 1000 * 60 * 60
-            let seconds = estimatedMillisecondsSaved < 1000 * 60
-            var counter: Double = 0
-            var text = ""
-            
-            if seconds {
-                counter = ceil(Double(estimatedMillisecondsSaved / 1000))
-                text = Strings.shieldsTimeStatsSeconds
-            } else if minutes {
-                counter = ceil(Double(estimatedMillisecondsSaved / 1000 / 60))
-                text = Strings.shieldsTimeStatsMinutes
-            } else if hours {
-                counter = ceil(Double(estimatedMillisecondsSaved / 1000 / 60 / 60))
-                text = Strings.shieldsTimeStatsHour
-            } else {
-                counter = ceil(Double(estimatedMillisecondsSaved / 1000 / 60 / 60 / 24))
-                text = Strings.shieldsTimeStatsDays
-            }
-            
-            if let counterLocaleStr = Int(counter).decimalFormattedString {
-                return counterLocaleStr + text
-            } else {
-                return "0" + Strings.shieldsTimeStatsSeconds     // If decimalFormattedString returns nil, default to "0s"
-            }
-        }
+        timeStatView.stat = BraveGlobalShieldStats.shared.timeSaved
     }
 }
 
@@ -194,14 +161,5 @@ private class StatView: UIView {
     
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-}
-
-private extension Int {
-    var decimalFormattedString: String? {
-        let numberFormatter = NumberFormatter()
-        numberFormatter.numberStyle = NumberFormatter.Style.decimal
-        numberFormatter.locale = NSLocale.current
-        return numberFormatter.string(from: self as NSNumber)
     }
 }

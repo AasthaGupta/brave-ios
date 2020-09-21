@@ -21,6 +21,7 @@ import StoreKit
 import SafariServices
 import BraveUI
 import NetworkExtension
+import CoreData
 
 private let log = Logger.browserLogger
 
@@ -338,7 +339,21 @@ class BrowserViewController: UIViewController {
                 }
             }
         }
+        
+        if #available(iOS 14.0, *) {
+            widgetBookmarksFRC = Bookmark.frc(forFavorites: true, parentFolder: nil)
+            widgetBookmarksFRC?.fetchRequest.fetchLimit = 16
+            widgetBookmarksFRC?.delegate = self
+            try? widgetBookmarksFRC?.performFetch()
+            
+            if !FavoritesWidgetData.dataExists {
+                updateWidgetFavoritesData()
+            }
+        }
     }
+    
+    private var widgetBookmarksFRC: NSFetchedResultsController<Bookmark>?
+    private var widgetFaviconFetchers: [FaviconFetcher] = []
     
     let deviceCheckClient: DeviceCheckClient?
     
@@ -3652,4 +3667,37 @@ extension BrowserViewController: OnboardingControllerDelegate {
     
     // 60 days until the next time the user sees the onboarding..
     static let onboardingDaysInterval = TimeInterval(60.days)
+}
+
+extension BrowserViewController: NSFetchedResultsControllerDelegate {
+    func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
+        if #available(iOS 14.0, *) {
+            updateWidgetFavoritesData()
+        }
+    }
+    
+    @available(iOS 14.0, *)
+    private func updateWidgetFavoritesData() {
+        guard let frc = widgetBookmarksFRC else { return }
+        try? frc.performFetch()
+        if let favs = frc.fetchedObjects {
+            let group = DispatchGroup()
+            var favData: [WidgetFavorite] = []
+            favs.prefix(16).forEach { fav in
+                if let url = fav.url?.asURL {
+                    group.enter()
+                    let fetcher = FaviconFetcher(siteURL: url, kind: .largeIcon)
+                    widgetFaviconFetchers.append(fetcher)
+                    fetcher.load { _, attributes in
+                        favData.append(.init(url: url, favicon: attributes))
+                        group.leave()
+                    }
+                }
+            }
+            group.notify(queue: .main) { [self] in
+                widgetFaviconFetchers.removeAll()
+                FavoritesWidgetData.updateWidgetData(favData)
+            }
+        }
+    }
 }
