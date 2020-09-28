@@ -3581,7 +3581,8 @@ extension BrowserViewController: PreferencesObserver {
              Preferences.Shields.fingerprintingProtection.key,
              Preferences.Shields.useRegionAdBlock.key:
             tabManager.allTabs.forEach { $0.webView?.reload() }
-        case Preferences.Privacy.blockAllCookies.key:
+        case Preferences.Privacy.blockAllCookies.key,
+             Preferences.Shields.googleSafeBrowsing.key:
             // All `block all cookies` toggle requires a hard reset of Webkit configuration.
             tabManager.reset()
             if !Preferences.Privacy.blockAllCookies.value {
