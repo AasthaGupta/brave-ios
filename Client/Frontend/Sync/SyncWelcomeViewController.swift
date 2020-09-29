@@ -155,6 +155,7 @@ class SyncWelcomeViewController: SyncViewController {
         
         syncDeviceInfoObserver = BraveSyncDeviceObserver {
             print("WAITING FOR SYNC TO START?????: \(BraveSyncAPI.shared.isInSyncGroup)")
+            NotificationCenter.default.post(name: Sync.Notifications.syncReady, object: nil)
         }
     }
     
@@ -197,14 +198,14 @@ class SyncWelcomeViewController: SyncViewController {
         
         pairCamera.syncHandler = { codeWords in
             pairCamera.enableNavigationPrevention()
- 
-            BraveSyncAPI.shared.codeWords = BraveSyncAPI.shared.syncCode(fromHexSeed: codeWords)
-            BraveSyncAPI.shared.setSyncEnabled(true)
-
+            
             self.addSyncReadyNotificationObserver {
                 pairCamera.disableNavigationPrevention()
                 self.pushSettings()
             }
+ 
+            BraveSyncAPI.shared.codeWords = BraveSyncAPI.shared.syncCode(fromHexSeed: codeWords)
+            BraveSyncAPI.shared.setSyncEnabled(true)
         }
         
         navigationController?.pushViewController(pairCamera, animated: true)
