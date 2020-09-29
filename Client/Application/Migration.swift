@@ -120,7 +120,7 @@ extension Migration {
                 let bookmarks = bookmarks.map({ convertToChromiumFormat($0) })
                 
                 DispatchQueue.main.sync {
-                    let rootFolder = Migration.bookmarksAPI.mobileNode()
+                    let rootFolder = Migration.bookmarksAPI.mobileNode
                     
                     for bookmark in bookmarks {
                         if !migrateChromiumBookmarks(bookmark, chromiumBookmark: rootFolder!) {
