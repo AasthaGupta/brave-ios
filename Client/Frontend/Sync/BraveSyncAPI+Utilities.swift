@@ -10,7 +10,7 @@ import SwiftKeychainWrapper
 extension BraveSyncAPI {
     
     public static let seedByteLength = 32
-    private static let isInGroupKey = "BraveSyncV2_CodeWords"
+    private static let isInGroupKey = "BraveSyncAPI.isInGroupKey"
     
     var isInSyncGroup: Bool {
         if let codeWords = KeychainWrapper.standard.bool(forKey: BraveSyncAPI.isInGroupKey) {
