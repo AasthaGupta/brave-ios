@@ -21,9 +21,6 @@ class AdsDetailsViewController: UIViewController {
     super.init(nibName: nil, bundle: nil)
     
     state.ledger.add(observer)
-//    observer.confirmationsTransactionHistoryDidChange = { [weak self] in
-//      self?.fetchAdsDetails()
-//    }
   }
   
   @available(*, unavailable)
@@ -61,9 +58,9 @@ class AdsDetailsViewController: UIViewController {
   }
 
   func fetchAdsDetails() {
-//    state.ledger.adsDetailsForCurrentCycle { [weak self] adsReceived, estimatedEarnings, nextPaymentDate in
-//      self?.updateAdsInfo(adsReceived: adsReceived, estimatedEarnings: estimatedEarnings, nextPaymentDate: nextPaymentDate)
-//    }
+    state.ads.detailsForCurrentCycle { [weak self] adsReceived, estimatedEarnings, nextPaymentDate in
+      self?.updateAdsInfo(adsReceived: adsReceived, estimatedEarnings: estimatedEarnings, nextPaymentDate: nextPaymentDate)
+    }
   }
   
   func updateAdsInfo(adsReceived: Int, estimatedEarnings: Double, nextPaymentDate: Date?) {
