@@ -91,6 +91,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UIViewControllerRestorati
             KeychainWrapper.sharedAppContainerKeychain.setAuthenticationInfo(nil)
         }
         
+        BraveCoreShared.shared()?.setUserAgentCallback({ () -> String? in
+            return UserAgent.shouldUseDesktopMode ? UserAgent.desktop : UserAgent.mobile
+        })
+        
         return startApplication(application, withLaunchOptions: launchOptions)
     }
 
