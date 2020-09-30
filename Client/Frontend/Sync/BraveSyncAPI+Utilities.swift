@@ -9,33 +9,30 @@ import SwiftKeychainWrapper
 
 extension BraveSyncAPI {
     
+    public static let seedByteLength = 32
+    private static let isInGroupKey = "BraveSyncV2_CodeWords"
+    
     var isInSyncGroup: Bool {
-        if let codeWords = KeychainWrapper.standard.string(forKey: "BraveSyncV2_CodeWords"), !codeWords.isEmpty {
+        if let codeWords = KeychainWrapper.standard.bool(forKey: BraveSyncAPI.isInGroupKey) {
+            return codeWords
+        }
+        return false
+    }
+    
+    func joinSyncGroup(codeWords: String) -> Bool {
+        if self.isInSyncGroup {
+            self.leaveSyncGroup()
+        }
+        
+        if self.setSyncCode(codeWords) {
+            KeychainWrapper.standard.set(true, forKey: BraveSyncAPI.isInGroupKey)
             return true
         }
         return false
     }
     
-    var codeWords: String {
-        get {
-            if let codeWords = KeychainWrapper.standard.string(forKey: "BraveSyncV2_CodeWords"), !codeWords.isEmpty {
-                return codeWords
-            }
-            
-            let codeWords = BraveSyncAPI.shared.getSyncCode()
-            KeychainWrapper.standard.set(codeWords, forKey: "BraveSyncV2_CodeWords")
-            return codeWords
-        }
-        
-        set {
-            if BraveSyncAPI.shared.setSyncCode(newValue) {
-                KeychainWrapper.standard.set(newValue, forKey: "BraveSyncV2_CodeWords")
-            }
-        }
-    }
-    
     func leaveSyncGroup() {
         BraveSyncAPI.shared.resetSync()
-        KeychainWrapper.standard.removeObject(forKey: "BraveSyncV2_CodeWords")
+        KeychainWrapper.standard.removeObject(forKey: BraveSyncAPI.isInGroupKey)
     }
 }

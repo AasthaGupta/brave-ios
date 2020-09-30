@@ -98,8 +98,7 @@ class SyncAddDeviceViewController: SyncViewController {
         containerView.layer.cornerRadius = 8
         containerView.layer.masksToBounds = true
 
-        let syncSeed = BraveSyncAPI.shared.codeWords
-        if syncSeed.isEmpty {
+        if !BraveSyncAPI.shared.isInSyncGroup {
             showInitializationError()
             return
         }
@@ -112,7 +111,7 @@ class SyncAddDeviceViewController: SyncViewController {
             make.size.equalTo(barcodeSize)
         }
         
-        self.codewordsView.text = syncSeed
+        self.codewordsView.text = BraveSyncAPI.shared.getSyncCode()
         
         self.setupVisuals()
     }

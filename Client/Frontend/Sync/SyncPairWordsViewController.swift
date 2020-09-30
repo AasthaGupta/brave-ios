@@ -168,7 +168,7 @@ class SyncPairWordsViewController: SyncViewController {
         let codes = self.codewordsView.codeWords()
 
         // Maybe temporary validation, sync server has issues without this validation
-        if codes.count < Sync.seedByteLength / 2 {
+        if codes.count < BraveSyncAPI.seedByteLength / 2 {
             alert(title: Strings.notEnoughWordsTitle, message: Strings.notEnoughWordsDescription)
             return
         }
@@ -182,13 +182,10 @@ class SyncPairWordsViewController: SyncViewController {
             alert()
         })
         
-        let result = SyncCrypto().bytes(fromPassphrase: codes)
-        switch result {
-        case .success(let bytes):
-            print(codes)
-            //syncHandler?(bytes)
-        case .failure(let error):
-            alert(message: "\(error)")
+        if BraveSyncAPI.shared.isValidSyncCode(codes.joined(separator: " ")) {
+            syncHandler?(codes.joined(separator: " "))
+        } else {
+            alert(message: Strings.invalidSyncCodeMessage)
             disableNavigationPrevention()
         }
     }

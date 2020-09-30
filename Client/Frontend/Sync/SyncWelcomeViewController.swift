@@ -136,26 +136,16 @@ class SyncWelcomeViewController: SyncViewController {
     /// This makes all presented Sync View Controllers to dismiss, cleans up any sync setup and shows user a friendly message.
     private func handleSyncSetupFailure() {
         syncServiceObserver = BraveSyncServiceObserver { [weak self] in
-            self?.syncServiceObserver = nil
-            
-            print("SYNC TO STARTED?????: \(BraveSyncAPI.shared.isInSyncGroup)")
+            guard let self = self else { return }
+            print("SYNC SERVICE STATUS - In Sync Group: \(BraveSyncAPI.shared.isInSyncGroup)")
             
             if !BraveSyncAPI.shared.isInSyncGroup {
-                self?.dismiss(animated: true)
-                BraveSyncAPI.shared.leaveSyncGroup()
+                self.dismiss(animated: true)
 
                 let bvc = (UIApplication.shared.delegate as? AppDelegate)?.browserViewController
 
                 bvc?.present(SyncAlerts.initializationError, animated: true)
-            } else {
-                print("NOTIFICATION POSTED!!!")
-                NotificationCenter.default.post(name: Sync.Notifications.syncReady, object: nil)
             }
-        }
-        
-        syncDeviceInfoObserver = BraveSyncDeviceObserver {
-            print("WAITING FOR SYNC TO START?????: \(BraveSyncAPI.shared.isInSyncGroup)")
-            NotificationCenter.default.post(name: Sync.Notifications.syncReady, object: nil)
         }
     }
     
@@ -184,10 +174,14 @@ class SyncWelcomeViewController: SyncViewController {
             }
 
             addDevice.enableNavigationPrevention()
-            self.addSyncReadyNotificationObserver { pushAddDeviceVC() }
+            self.syncDeviceInfoObserver = BraveSyncDeviceObserver { [weak self] in
+                self?.syncDeviceInfoObserver = nil
+                pushAddDeviceVC()
+            }
             
-            BraveSyncAPI.shared.setSyncCode(BraveSyncAPI.shared.codeWords)
-            BraveSyncAPI.shared.setSyncEnabled(true)
+            if BraveSyncAPI.shared.joinSyncGroup(codeWords: BraveSyncAPI.shared.getSyncCode()) {
+                BraveSyncAPI.shared.setSyncEnabled(true)
+            }
         }
 
         navigationController?.pushViewController(addDevice, animated: true)
@@ -199,27 +193,18 @@ class SyncWelcomeViewController: SyncViewController {
         pairCamera.syncHandler = { codeWords in
             pairCamera.enableNavigationPrevention()
             
-            self.addSyncReadyNotificationObserver {
+            self.syncDeviceInfoObserver = BraveSyncDeviceObserver { [weak self] in
+                self?.syncDeviceInfoObserver = nil
                 pairCamera.disableNavigationPrevention()
-                self.pushSettings()
+                self?.pushSettings()
             }
  
-            BraveSyncAPI.shared.codeWords = BraveSyncAPI.shared.syncCode(fromHexSeed: codeWords)
-            BraveSyncAPI.shared.setSyncEnabled(true)
+            if BraveSyncAPI.shared.joinSyncGroup(codeWords: codeWords) {
+                BraveSyncAPI.shared.setSyncEnabled(true)
+            }
         }
         
         navigationController?.pushViewController(pairCamera, animated: true)
-    }
-
-    private func addSyncReadyNotificationObserver(completion: @escaping () -> Void) {
-        NotificationCenter.default.addObserver(forName: Sync.Notifications.syncReady,
-                                               object: nil,
-                                               queue: .main,
-                                               using: { notification in
-                                                completion()
-                                                // This is a one-time notification, removing it immediately.
-                                                NotificationCenter.default.removeObserver(notification)
-        })
     }
     
     private func pushSettings() {

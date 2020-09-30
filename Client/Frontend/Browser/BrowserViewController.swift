@@ -666,7 +666,6 @@ class BrowserViewController: UIViewController {
         
         vpnProductInfo.load()
         BraveVPN.initialize()
-        
     }
     
     private func deprecateSyncV1() {

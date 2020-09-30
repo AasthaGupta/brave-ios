@@ -25,10 +25,10 @@ class Migration {
             Preferences.Migration.documentsDirectoryCleanupCompleted.value = true
         }
         
-        bookmarksAPI = BraveBookmarksAPI()
+        //bookmarksAPI = BraveBookmarksAPI()
         //DispatchQueue.main.asyncAfter(deadline: .now() + 10.0) {
-            print("MIGRATING!")
-            Migration.migrateBookmarksToChromium()
+            //print("MIGRATING!")
+            //Migration.migrateBookmarksToChromium()
         //}
     }
     

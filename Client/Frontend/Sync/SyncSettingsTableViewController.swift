@@ -54,14 +54,10 @@ class SyncSettingsTableViewController: UITableViewController {
             self?.updateDeviceList()
         }
         
-        syncStateObserver = BraveSyncServiceObserver {
-            print("STATE CHANGED!!!")
+        if BraveSyncAPI.shared.isInSyncGroup && BraveSyncAPI.shared.joinSyncGroup(codeWords: BraveSyncAPI.shared.getSyncCode()) {
+            BraveSyncAPI.shared.setSyncEnabled(true)
+        } else {
         }
-        
-        //BraveSyncAPI.shared.leaveSyncGroup()
-        BraveSyncAPI.shared.setSyncCode(BraveSyncAPI.shared.getSyncCode())
-        BraveSyncAPI.shared.setSyncEnabled(true)
-        self.updateDeviceList()
         
         let text = UITextView().then {
             $0.text = Strings.syncSettingsHeader
@@ -229,7 +225,7 @@ class SyncSettingsTableViewController: UITableViewController {
     
     private func configureCell(_ cell: UITableViewCell, atIndexPath indexPath: IndexPath) {
         guard !devices.isEmpty else {
-            log.error("FetchedResultsController is nil.")
+            log.error("No sync devices to configure.")
             return
         }
         

@@ -4,6 +4,7 @@ import UIKit
 import Shared
 import AVFoundation
 import BraveShared
+import BraveRewards
 import Data
 
 class SyncPairCameraViewController: SyncViewController {
@@ -72,8 +73,12 @@ class SyncPairCameraViewController: SyncViewController {
             
             // If multiple calls get in here due to race conditions it isn't a big deal
             
-            self.syncHandler?(data)
-            //self.cameraView.cameraOverlayError()
+            let codeWords = BraveSyncAPI.shared.syncCode(fromHexSeed: data)
+            if !codeWords.isEmpty {
+                self.syncHandler?(codeWords)
+            } else {
+                self.cameraView.cameraOverlayError()
+            }
         }
 
         stackView.addArrangedSubview(cameraView)
