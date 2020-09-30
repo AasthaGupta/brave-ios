@@ -66,85 +66,28 @@ class Migration {
     }
 }
 
-class BookmarkAPIObserver: NSObject & BookmarkModelObserver {
-    private let onModelLoaded: () -> Void
-    
-    init(_ onModelLoaded: @escaping () -> Void) {
-        self.onModelLoaded = onModelLoaded
-    }
-    
-    func bookmarkModelLoaded() {
-        self.onModelLoaded()
-    }
-    
-    func bookmarkNodeChanged(_ bookmarkNode: BookmarkNode!) {
-        
-    }
-    
-    func bookmarkNodeChildrenChanged(_ bookmarkNode: BookmarkNode!) {
-        
-    }
-    
-    func bookmarkNode(_ bookmarkNode: BookmarkNode!, movedFromParent oldParent: BookmarkNode!, toParent newParent: BookmarkNode!) {
-        
-    }
-    
-    func bookmarkNodeDeleted(_ node: BookmarkNode!, fromFolder folder: BookmarkNode!) {
-        
-    }
-    
-    func bookmarkModelRemovedAllNodes() {
-        
-    }
-}
-
 extension Migration {
     static var bookmarksAPI: BraveBookmarksAPI!
-    static var observer: BookmarkModelListener?
-    
-    private struct BookmarkInfo: Hashable {
-        let title: String?
-        let url: String?
-        let isFolder: Bool
-        let children: [BookmarkInfo]?
-    }
     
     public static func migrateBookmarksToChromium() {
-        observer = bookmarksAPI.add(BookmarkAPIObserver({ [weak observer] in
-            observer?.destroy()
-            observer = nil
+        bookmarksAPI = BraveBookmarksAPI()
+        
+        Bookmark.syncChromiumMigration { bookmarks, favourites in
+            let rootFolder = Migration.bookmarksAPI.mobileNode()
             
-            bookmarksAPI.removeAll()
-            
-            Bookmark.syncChromiumMigration { bookmarks, favourites in
-                let bookmarks = bookmarks.map({ convertToChromiumFormat($0) })
-                
-                DispatchQueue.main.sync {
-                    let rootFolder = Migration.bookmarksAPI.mobileNode
-                    
-                    for bookmark in bookmarks {
-                        if !migrateChromiumBookmarks(bookmark, chromiumBookmark: rootFolder!) {
-                            print("Migration Failed somehow..")
-                        }
-                    }
-                    
-                    print("MIGRATION FINISHED!")
+            for bookmark in bookmarks {
+                print(bookmark.title)
+                print(bookmark)
+                if !migrateChromiumBookmarks(bookmark, chromiumBookmark: rootFolder!) {
+                    print("Migration Failed somehow..")
                 }
             }
-        }))
-    }
-    
-    private static func convertToChromiumFormat(_ bookmark: Bookmark) -> BookmarkInfo {
-        if let children = bookmark.children {
-            return BookmarkInfo(title: bookmark.customTitle ?? bookmark.title, url: bookmark.url, isFolder: bookmark.isFolder, children: children.map({ convertToChromiumFormat($0) }))
         }
-        
-        return BookmarkInfo(title: bookmark.customTitle ?? bookmark.title, url: bookmark.url, isFolder: bookmark.isFolder, children: nil)
     }
     
-    private static func migrateChromiumBookmarks(_ bookmark: BookmarkInfo, chromiumBookmark: BookmarkNode) -> Bool {
+    private static func migrateChromiumBookmarks(_ bookmark: Bookmark, chromiumBookmark: BookmarkNode) -> Bool {
         
-        guard let title = bookmark.title else {
+        guard let title = bookmark.customTitle else {
             // Can't migrate a bookmark with no title..
             return false
         }
