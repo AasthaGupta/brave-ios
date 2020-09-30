@@ -3516,7 +3516,6 @@ extension BrowserViewController: NewTabPageDelegate {
             self.present(editPopup, animated: true)
         }
     }
-
     
     func focusURLBar() {
         focusLocationField()
