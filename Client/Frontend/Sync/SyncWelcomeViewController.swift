@@ -179,9 +179,8 @@ class SyncWelcomeViewController: SyncViewController {
                 pushAddDeviceVC()
             }
             
-            if BraveSyncAPI.shared.joinSyncGroup(codeWords: BraveSyncAPI.shared.getSyncCode()) {
-                BraveSyncAPI.shared.setSyncEnabled(true)
-            }
+            BraveSyncAPI.shared.joinSyncGroup(codeWords: BraveSyncAPI.shared.getSyncCode())
+            BraveSyncAPI.shared.setSyncEnabled(true)
         }
 
         navigationController?.pushViewController(addDevice, animated: true)
@@ -199,9 +198,8 @@ class SyncWelcomeViewController: SyncViewController {
                 self?.pushSettings()
             }
  
-            if BraveSyncAPI.shared.joinSyncGroup(codeWords: codeWords) {
-                BraveSyncAPI.shared.setSyncEnabled(true)
-            }
+            BraveSyncAPI.shared.joinSyncGroup(codeWords: codeWords)
+            BraveSyncAPI.shared.setSyncEnabled(true)
         }
         
         navigationController?.pushViewController(pairCamera, animated: true)

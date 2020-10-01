@@ -54,10 +54,11 @@ class SyncSettingsTableViewController: UITableViewController {
             self?.updateDeviceList()
         }
         
-        if BraveSyncAPI.shared.isInSyncGroup && BraveSyncAPI.shared.joinSyncGroup(codeWords: BraveSyncAPI.shared.getSyncCode()) {
-            BraveSyncAPI.shared.setSyncEnabled(true)
-        } else {
-        }
+        let codeWords = BraveSyncAPI.shared.getSyncCode()
+        BraveSyncAPI.shared.joinSyncGroup(codeWords: codeWords)
+        BraveSyncAPI.shared.setSyncEnabled(true)
+        
+        self.updateDeviceList()
         
         let text = UITextView().then {
             $0.text = Strings.syncSettingsHeader

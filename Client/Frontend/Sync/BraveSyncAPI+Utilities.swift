@@ -19,11 +19,8 @@ extension BraveSyncAPI {
         return false
     }
     
+    @discardableResult
     func joinSyncGroup(codeWords: String) -> Bool {
-        if self.isInSyncGroup {
-            self.leaveSyncGroup()
-        }
-        
         if self.setSyncCode(codeWords) {
             KeychainWrapper.standard.set(true, forKey: BraveSyncAPI.isInGroupKey)
             return true
